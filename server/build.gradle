@@ -22,6 +22,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'jacoco'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'checkstyle'
 apply plugin: 'findbugs'
 apply plugin: 'pmd'
 
@@ -189,6 +190,25 @@ pmdTest {
     reports {
         xml.enabled = true
         html.enabled = true
+    }
+}
+
+/*
+=========================================================
+   Checkstyle configuration
+=========================================================
+*/
+checkstyle {
+    ignoreFailures = true
+    reportsDir = file("$project.buildDir/checkstyleReports")
+    showViolations = true
+    //toolVersion = The version of the code quality tool to be used.
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.enabled true
+        html.enabled true
     }
 }
 
