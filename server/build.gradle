@@ -17,7 +17,6 @@ buildscript {
   Apply Plugins
 =========================================================
  */
-apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'jacoco'
@@ -32,6 +31,12 @@ apply plugin: 'pmd'
 =========================================================
 */
 sourceSets {
+    main {
+        java {
+            srcDirs += project(":api-java").files('src/main/java')
+        }
+    }
+
     integrationTest {
         java {
             compileClasspath += main.output + test.output
@@ -202,7 +207,6 @@ checkstyle {
     ignoreFailures = true
     reportsDir = file("$project.buildDir/checkstyleReports")
     showViolations = true
-    //toolVersion = The version of the code quality tool to be used.
 }
 
 tasks.withType(Checkstyle) {
@@ -249,4 +253,5 @@ dependencies {
     }
     compile("org.springframework.boot:spring-boot-starter-jetty")
     compile("org.springframework.boot:spring-boot-starter-actuator")
+    compile libraries.thrift
 }
