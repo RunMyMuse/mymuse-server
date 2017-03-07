@@ -1,0 +1,5 @@
+rootProject.name = 'mymuse-server'
+
+include 'api-java'
+include 'api-thrift'
+include 'server'

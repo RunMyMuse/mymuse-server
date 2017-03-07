@@ -1,0 +1,232 @@
+/*
+=========================================================
+   Buildscript dependencies
+=========================================================
+ */
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.1.RELEASE")
+    }
+}
+
+/*
+=========================================================
+  Apply Plugins
+=========================================================
+ */
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'jacoco'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'findbugs'
+apply plugin: 'pmd'
+
+/*
+=========================================================
+    Setup Integration tests
+=========================================================
+*/
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/integration-test/java')
+        }
+        resources.srcDir file('src/integration-test/resources')
+    }
+}
+
+// Give the integration tests the unit test dependencies
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
+task startIntegrationTests() {
+    doLast {
+        //Start client
+    }
+}
+
+task killIntegrationTests() {
+    doLast {
+        //Kill Client
+    }
+}
+
+task integrationTest(type: Test) {
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+    classpath = sourceSets.integrationTest.runtimeClasspath
+}
+
+integrationTest.dependsOn assemble
+integrationTest.dependsOn startIntegrationTests
+integrationTest.finalizedBy killIntegrationTests
+
+tasks.withType(Test) {
+    reports.html.destination = file("${reporting.baseDir}/${name}")
+}
+
+/*
+=========================================================
+   Repo Info
+=========================================================
+ */
+
+group = 'run.mymuse'
+
+description = 'Server for My Muse service'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+/*
+=========================================================
+  Create self contained jar
+=========================================================
+*/
+springBoot {
+    mainClass = "run.mymuse.Boot"
+}
+
+bootRun {
+    /*
+     * Support testing directly via gradle.
+     *
+     * Example:
+     *  $ gradle bootRun
+     */
+
+    if (project.hasProperty('args')) {
+        args project.args.split('\\s+')
+    }
+}
+
+jar {
+    baseName = project.name
+    archiveName = "${baseName}.jar"
+
+    manifest {
+        attributes(
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+        )
+    }
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+/*
+=========================================================
+  Generates Test Report
+=========================================================
+*/
+jacocoTestReport {
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [])
+        })
+    }
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
+}
+
+/*
+=========================================================
+   PMD plugin configuration
+=========================================================
+*/
+pmd {
+    ignoreFailures = true
+    reportsDir = file("$project.buildDir/pmdReports")
+    ruleSets = [
+            "java-basic",
+            "java-braces",
+            "java-clone",
+            "java-design",
+            "java-empty",
+            "java-finalizers",
+            "java-imports",
+            "java-j2ee",
+            "java-migrating",
+            "java-migrating_to_junit4",
+            "java-strictexception",
+            "java-strings",
+            "java-sunsecure",
+            "java-typeresolution",
+            "java-unnecessary",
+            "java-unusedcode"
+    ]
+}
+
+pmdMain {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+pmdTest {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+/*
+=========================================================
+   Findbugs configuration
+=========================================================
+*/
+findbugs{
+    ignoreFailures = true
+    effort = "max"
+    reportLevel = "high"
+    reportsDir = file("$project.buildDir/findbugsReports")
+}
+
+findbugsMain {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
+
+findbugsTest {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
+
+/*
+=========================================================
+   Dependencies
+=========================================================
+*/
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web") {
+        exclude module: "spring-boot-starter-tomcat"
+    }
+    compile("org.springframework.boot:spring-boot-starter-jetty")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+}

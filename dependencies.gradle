@@ -1,0 +1,14 @@
+ext {
+    versions = [:]
+    libraries = [:]
+}
+
+versions.hamcrest = '2.0.0.0.0'
+versions.junit = '4.12'
+versions.thrift = '0.10.0'
+versions.slf4j = '1.7.21'
+
+libraries.hamcrest = "org.hamcrest:java-hamcrest:${versions.hamcrest}"
+libraries.junit = "junit:junit:${versions.junit}"
+libraries.thrift = "org.thrift:libthrift:${versions.thrift}"
+libraries.slf4j_api = "org.slf4j:slf4j-api:${versions.slf4j}"
