@@ -12,7 +12,8 @@ before_install:
   - sudo apt-get install thrift-compiler
 
 script:
-  - codecov
+  - ./gradlew codeCoverageReport
 
 after_success:
   - ./gradlew dockerize
+  - cd server && bash <(curl -s https://codecov.io/bash)
