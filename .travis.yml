@@ -15,5 +15,5 @@ script:
   - ./gradlew jacocoTestReport
 
 after_success:
-  - ./gradlew dockerize
+  - ./gradlew dockerize -Ptravis
   - cd server && bash <(curl -s https://codecov.io/bash)

@@ -247,7 +247,7 @@ findbugsTest {
    Dockerize
 =========================================================
  */
-task dockerize(type: Docker, dependsOn: assemble) {
+task dockerize(type: Docker) {
     push = false
     applicationName = jar.baseName
     dockerfile = file('src/main/docker/Dockerfile')
@@ -257,6 +257,11 @@ task dockerize(type: Docker, dependsOn: assemble) {
             into stageDir
         }
     }
+}
+dockerize.dependsOn assemble
+
+if (rootProject.hasProperty("travis") || System.hasProperty("TRAVIS")) {
+    dockerize.dependsOn = []
 }
 
 /*
