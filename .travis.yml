@@ -11,9 +11,7 @@ services:
 before_install:
   - sudo apt-get install thrift-compiler
 
-script:
-  - ./gradlew jacocoTestReport
-
 after_success:
   - ./gradlew dockerize -Ptravis
-  - cd server && bash <(curl -s https://codecov.io/bash)
+  - ./gradlew jacocoTestReport
+  - bash <(curl -s https://codecov.io/bash)
