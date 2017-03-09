@@ -12,7 +12,7 @@ before_install:
   - sudo apt-get install thrift-compiler
 
 script:
-  - ./gradlew codeCoverageReport
+  - ./gradlew jacocoTestReport
 
 after_success:
   - ./gradlew dockerize
