@@ -11,5 +11,4 @@ before_install:
   - cd thrift-0.10.0 && ./configure && sudo make install
 
 script:
-  - ./gradlew clean build
   - codecov
