@@ -1,4 +1,4 @@
-namespace java run.mymuse
+namespace java run.mymuse.api
 
 service Service {
   /**

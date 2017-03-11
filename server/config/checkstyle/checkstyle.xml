@@ -9,7 +9,7 @@
         <module name="UnusedImports"/>
         <module name="RedundantImport"/>
         <module name="AvoidStarImport">
-            <property name="excludes" value="com.workiva.service.web"/>
+            <property name="excludes" value="run.mymuse.api"/>
         </module>
         <module name="AvoidNestedBlocks"/>
         <module name="LineLength">

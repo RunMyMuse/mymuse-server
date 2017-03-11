@@ -1,15 +1,17 @@
-## Setup
+﻿## Setup
 
-### Gradle Setup
+### Mac
+
+#### Gradle Setup
 
    Gradle is used to gather dependencies and build a fat jar for this project you can install and configure it using:
    
-   - Note: `$ brew install gradle` is not needed if you already have a working version of gradle for this project. 
+   - Note: `brew install gradle` is not needed if you already have a working version of gradle for this project. 
    - We are in the process of converting to Gradle 3.1. If you have any issues, Gradle 2.14 is recommended.
         
-        $ brew install gradle
+        brew install gradle
         
-#### Notes about Gradle and brew:
+##### Notes about Gradle and brew:
    
    Vite Server can be built in Gradle 2.x or 3.1. To make sure you are safe moving forward, there is a way to switch 
    back and forth between gradle installations. First verify what gradle you have brew installed with the `brew info` 
@@ -73,17 +75,17 @@
 
 #### Installing Java
 
-        $ brew install java
+        brew install java
 
 
 #### Setting the default version
    The following lines should be added to your .profile in order to switch between Java environments
 
-        $ export DEFAULT_JDK_VERSION=1.8
-        $ export JAVA_HOME=$(/usr/libexec/java_home -F -v "$DEFAULT_JDK_VERSION")
-        $ alias jdkDefault="export JAVA_HOME=$(/usr/libexec/java_home -F -v $DEFAULT_JDK_VERSION)"
-        $ alias jdk8="export JAVA_HOME=$(/usr/libexec/java_Home -F -v 1.8)"
+        export DEFAULT_JDK_VERSION=1.8
+        export JAVA_HOME=$(/usr/libexec/java_home -F -v "$DEFAULT_JDK_VERSION")
+        alias jdkDefault="export JAVA_HOME=$(/usr/libexec/java_home -F -v $DEFAULT_JDK_VERSION)"
+        alias jdk8="export JAVA_HOME=$(/usr/libexec/java_Home -F -v 1.8)"
 
 ### Getting the Repo
 1. Fork the repo
-2. Clone your fork (`$ git clone git@github.com:<your username>/mymuse-server.git`)
+2. Clone your fork (`git clone git@github.com:<your username>/mymuse-server.git`)
