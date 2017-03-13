@@ -1,0 +1,9 @@
+logging:
+  level:
+    ROOT: 'info'
+    run.mymuse: 'debug'
+    org.springframework: 'warn'
+
+spring:
+  main:
+    banner-mode: 'off'

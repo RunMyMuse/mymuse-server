@@ -1,0 +1,287 @@
+/*
+=========================================================
+   Buildscript dependencies
+=========================================================
+ */
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.1.RELEASE")
+        classpath("se.transmode.gradle:gradle-docker:1.2")
+    }
+}
+
+/*
+=========================================================
+  Apply Plugins
+=========================================================
+ */
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'jacoco'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'checkstyle'
+apply plugin: 'findbugs'
+apply plugin: 'pmd'
+apply plugin: 'docker'
+
+/*
+=========================================================
+    Setup Integration tests
+=========================================================
+*/
+sourceSets {
+    main {
+        java {
+            srcDirs += project(":api-java").files('src/main/java')
+        }
+    }
+
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/integration-test/java')
+        }
+        resources.srcDir file('src/integration-test/resources')
+    }
+}
+
+// Give the integration tests the unit test dependencies
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
+task startIntegrationTests() {
+    doLast {
+        //Start client
+    }
+}
+
+task killIntegrationTests() {
+    doLast {
+        //Kill Client
+    }
+}
+
+task integrationTest(type: Test, dependsOn: [assemble, startIntegrationTests]) {
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+    classpath = sourceSets.integrationTest.runtimeClasspath
+}
+
+integrationTest.finalizedBy killIntegrationTests
+
+tasks.withType(Test) {
+    reports.html.destination = file("${reporting.baseDir}/${name}")
+}
+
+/*
+=========================================================
+   Repo Info
+=========================================================
+ */
+
+group = 'run.mymuse'
+
+description = 'Server for My Muse service'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+/*
+=========================================================
+  Create self contained jar
+=========================================================
+*/
+springBoot {
+    mainClass = "run.mymuse.Boot"
+}
+
+bootRun {
+    /*
+     * Support testing directly via gradle.
+     *
+     * Example:
+     *  $ gradle bootRun
+     */
+
+    if (project.hasProperty('args')) {
+        args project.args.split('\\s+')
+    }
+}
+
+jar {
+    baseName = project.name
+    archiveName = "${baseName}.jar"
+
+    manifest {
+        attributes(
+                "Implementation-Title": baseName,
+                "Implementation-Version": project.version,
+        )
+    }
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+/*
+=========================================================
+  Generates Test Report
+=========================================================
+*/
+jacocoTestReport {
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [])
+        })
+    }
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
+}
+
+/*
+=========================================================
+   PMD plugin configuration
+=========================================================
+*/
+pmd {
+    ignoreFailures = true
+    reportsDir = file("$project.buildDir/pmdReports")
+    ruleSets = [
+            "java-basic",
+            "java-braces",
+            "java-clone",
+            "java-design",
+            "java-empty",
+            "java-finalizers",
+            "java-imports",
+            "java-j2ee",
+            "java-migrating",
+            "java-migrating_to_junit4",
+            "java-strictexception",
+            "java-strings",
+            "java-sunsecure",
+            "java-typeresolution",
+            "java-unnecessary",
+            "java-unusedcode"
+    ]
+}
+
+pmdMain {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+pmdTest {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+/*
+=========================================================
+   Checkstyle configuration
+=========================================================
+*/
+checkstyle {
+    ignoreFailures = true
+    reportsDir = file("$project.buildDir/checkstyleReports")
+    showViolations = true
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
+}
+
+/*
+=========================================================
+   Findbugs configuration
+=========================================================
+*/
+findbugs{
+    ignoreFailures = true
+    effort = "max"
+    reportLevel = "high"
+    reportsDir = file("$project.buildDir/findbugsReports")
+}
+
+findbugsMain {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
+
+findbugsTest {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
+
+/*
+=========================================================
+   Dockerize
+=========================================================
+ */
+task dockerize(type: Docker) {
+    push = false
+    applicationName = jar.baseName
+    dockerfile = file('src/main/docker/Dockerfile')
+    doFirst {
+        copy {
+            from jar
+            into stageDir
+        }
+    }
+}
+dockerize.dependsOn assemble
+
+if (rootProject.hasProperty("travis") || System.hasProperty("TRAVIS")) {
+    dockerize.dependsOn = []
+}
+
+/*
+=========================================================
+   Dependencies
+=========================================================
+*/
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web") {
+        exclude module: "spring-boot-starter-tomcat"
+    }
+    compile("org.springframework.boot:spring-boot-starter-jetty")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    compile libraries.thrift
+    compile libraries.slf4j_api
+    testCompile libraries.junit
+    testCompile libraries.hamcrest_core
+    testCompile libraries.hamcrest_library
+}

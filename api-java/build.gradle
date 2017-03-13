@@ -1,0 +1,70 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+
+        mavenCentral()
+    }
+    dependencies {
+        classpath "gradle.plugin.org.jruyi.gradle:thrift-gradle-plugin:0.4.0"
+    }
+}
+
+apply plugin: "org.jruyi.thrift"
+apply plugin: 'java'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+def artifactName = 'mymuse-server-api'
+def outputDirectory = 'src/main/java'
+
+sourceSets {
+    main.java.srcDirs += outputDirectory
+}
+
+compileThrift {
+    sourceDir project(':api-thrift').file('src/main/thrift')
+    outputDir outputDirectory
+    generator 'java', 'private-members'
+    createGenFolder false
+}
+compileJava.dependsOn compileThrift
+
+task generatePom {
+    outputs.file "$buildDir/tmp/maven/pom.xml"
+    doLast {
+        pom {
+            project {
+                artifactId = artifactName
+                name = artifactName
+            }
+        }.writeTo("$buildDir/tmp/maven/pom.xml")
+    }
+}
+
+jar {
+    baseName = artifactName
+    manifest {
+        attributes(
+                "Implementation-Title": baseName,
+                "Implementation-Version": project.version,
+        )
+    }
+    into("META-INF/maven/$project.group/$baseName") {
+        from "$buildDir/tmp/maven/"
+    }
+}
+jar.dependsOn generatePom
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile libraries.thrift
+}
+
+clean.delete outputDirectory
